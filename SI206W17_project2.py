@@ -16,6 +16,7 @@ import requests
 import tweepy
 import twitter_info # Requires you to have a twitter_info file in this directory
 from bs4 import BeautifulSoup
+import re
 
 ## Tweepy authentication setup
 ## Fill these in in the twitter_info.py file
@@ -73,9 +74,12 @@ def get_twitter_info(username):
 ## find_urls("I love looking at websites like http://etsy.com and http://instagram.com and stuff") should return ["http://etsy.com","http://instagram.com"]
 ## find_urls("the internet is awesome #worldwideweb") should return [], empty list
 
-# def find_urls(anystring):
-# 	URLlist = []
-# 	if 
+def find_urls(anystring):
+	
+	regex = r"\bhttps?://\w+(?:\.\w+)+\b"
+	all_url = re.findall(regex, anystring, re.MULTILINE)
+	return all_url
+
 
 
 
@@ -93,7 +97,15 @@ def get_twitter_info(username):
 
 
 
-
+def get_umsi_data(self):
+	if cached data in cached_file:
+		return cached data
+	else:
+		# access each page of directory
+		# get HTML associtated with it
+		# append that HTML String to a list
+		#the function should cache (save) that list when it is accumulated
+		return #HTMLString(each page of UMSI directory)
 
 
 
