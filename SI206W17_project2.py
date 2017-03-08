@@ -87,20 +87,25 @@ def get_umsi_data():
 
 	url = "https://www.si.umich.edu/directory?field_person_firstname_value=&field_person_lastname_value=&rid=All"
 
-	unique_identifier = "umsi_directory_data".format
-	
+	unique_identifier = "umsi_directory_data"
+	directory_pages = []
+
+	for x in range(12):
+		pages = url+"&page="+str(x)
+		r = requests.get(pages, headers={'User-Agent':'SI_CLASS'})
+		htmldoc = r.text
+		soup = BeautifulSoup(htmldoc, "html.parser")
+		directory_pages.append(str(soup))
+
 	if unique_identifier in CACHE_DICTION:
 		soup = CACHE_DICTION[unique_identifier]
+		return directory_pages
+		
 	else:
-		directory_pages = []
-
-		for x in range(12):
-			pages = url+"&page="+str(x)
-			r = requests.get(pages, headers={'User-Agent':'SI_CLASS'})
-			htmldoc = r.text
-			soup = BeautifulSoup(htmldoc, "html.parser")
-			directory_pages.append(str(soup))
-
+		CACHE_DICTION[unique_identifier] = htmldoc
+		f = open(cache_fname, "w")
+		f.write(json.dumps(CACHE_DICTION))
+		f.close()
 		return directory_pages
 
 
