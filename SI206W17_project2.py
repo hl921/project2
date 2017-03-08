@@ -34,10 +34,7 @@ api = tweepy.API(auth, parser=tweepy.parsers.JSONParser())
 
 ## Write the code to begin your caching pattern setup here.
 
-url = "https://www.si.umich.edu/"
-r = requests.get(url)
-htmldoc = r.text
-soup = BeautifulSoup(htmldoc, "html.parser")
+
 
 
 cache_fname = "206project2_caching.json"
@@ -50,18 +47,7 @@ except:
 	CACHE_DICTION = {}
 
 
-def get_twitter_info(username):
-	unique_identifier = "twitter_University of Michigan".format(uersname)
-	if unique_identifier in CACHE_DICTION:
-		twitter_results = CACHE_DICTION[unique_identifier]
-	else:
-		twitter_results = api.user_timeline(username)
-		CACHE_DICTION[unique_identifier] = twitter_results
-		f = open(cachue_fname, 'w')
-		f.write(json.dumps(CACHE_DICTION))
-		f.close()
 
-#people = soup.find_all("div", {"class":"views-row"})
 #unique identifier = "umsi_directory_data"
 
 
@@ -97,15 +83,31 @@ def find_urls(anystring):
 
 
 
-def get_umsi_data(self):
-	if cached data in cached_file:
-		return cached data
+def get_umsi_data():
+
+	url = "https://www.si.umich.edu/directory?field_person_firstname_value=&field_person_lastname_value=&rid=All"
+
+	unique_identifier = "umsi_directory_data".format
+	
+	if unique_identifier in CACHE_DICTION:
+		soup = CACHE_DICTION[unique_identifier]
 	else:
-		# access each page of directory
-		# get HTML associtated with it
-		# append that HTML String to a list
-		#the function should cache (save) that list when it is accumulated
-		return #HTMLString(each page of UMSI directory)
+		directory_pages = []
+
+		for x in range(12):
+			pages = url+"&page="+str(x)
+			r = requests.get(pages, headers={'User-Agent':'SI_CLASS'})
+			htmldoc = r.text
+			soup = BeautifulSoup(htmldoc, "html.parser")
+			directory_pages.append(str(soup))
+
+		return directory_pages
+
+
+
+
+
+
 
 
 
@@ -114,7 +116,27 @@ def get_umsi_data(self):
 
 
 
+umsi_data1 = get_umsi_data()
+umsi_data = BeautifulSoup(str(umsi_data1), "html.parser")
 
+
+umsi_titles = {}
+names = []
+titles = []
+
+
+for x in umsi_data.find_all(class_="field field-name-title field-type-ds field-label-hidden"):
+	name = x.text
+	t = str(name).replace("\\","")
+	names.append(t)
+
+for x in umsi_data.find_all(class_="field field-name-field-person-titles field-type-text field-label-hidden"):
+	title = x.text
+	t = str(title)
+	titles.append(t)
+
+
+umsi_titles = dict(zip(names, titles))
 
 
 
@@ -124,14 +146,39 @@ def get_umsi_data(self):
 ## RETURN VALUE: A list of strings: A list of just the text of 5 different tweets that result from the search.
 
 
+def get_five_tweets(s):
 
+	unique_identifier = "twitter_University of Michigan".format(s)
 
+	if unique_identifier in CACHE_DICTION:
+		twitter_results = CACHE_DICTION[unique_identifier]
+
+	else:
+		twitter_results = api.search(q=s)
+		CACHE_DICTION[unique_identifier] = twitter_results
+		f = open(cache_fname, 'w')
+		f.write(json.dumps(CACHE_DICTION))
+		f.close()
+
+	twts = []
+	five = twitter_results["statuses"][0:5]
+
+	for twt in five:
+		tweet_status = twt["text"]
+		twts.append(tweet_status)
+	
+	return twts
 ## PART 3 (b) - Write one line of code to invoke the get_five_tweets function with the phrase "University of Michigan" and save the result in a variable five_tweets.
+
+five_tweets = get_five_tweets("University of Michigan")
 
 
 
 
 ## PART 3 (c) - Iterate over the five_tweets list, invoke the find_urls function that you defined in Part 1 on each element of the list, and accumulate a new list of each of the total URLs in all five of those tweets in a variable called tweet_urls_found. 
+
+for t in five_tweets:
+	tweet_urls_found = find_urls(str(t))
 
 
 
@@ -177,8 +224,9 @@ class PartTwo(unittest.TestCase):
 		self.assertEqual(type(get_umsi_data()),type([]))
 	def test_begin_of_list(self):
 		self.assertEqual(get_umsi_data()[0][:100],"""<!DOCTYPE html>
+
 <!--[if IEMobile 7]><html class="iem7"  lang="en" dir="ltr"><![endif]-->
-<!--[if lte""", "Testing the beginning of the first element of the return value of get_umsi_data")
+<!--[if lt""", "Testing the beginning of the first element of the return value of get_umsi_data")
 	def test_part_of_list(self):
 		self.assertEqual(get_umsi_data()[4][500:512],"""c: http://pu""")
 	def test_umsi_titles_len(self):
