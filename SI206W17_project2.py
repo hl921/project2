@@ -98,11 +98,11 @@ def get_umsi_data():
 		directory_pages.append(str(soup))
 
 	if unique_identifier in CACHE_DICTION:
-		soup = CACHE_DICTION[unique_identifier]
+		directory_pages = CACHE_DICTION[unique_identifier]
 		return directory_pages
 		
 	else:
-		CACHE_DICTION[unique_identifier] = htmldoc
+		CACHE_DICTION[unique_identifier] = directory_pages
 		f = open(cache_fname, "w")
 		f.write(json.dumps(CACHE_DICTION))
 		f.close()
